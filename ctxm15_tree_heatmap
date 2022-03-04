@@ -20,7 +20,7 @@ Resdata <- select(Resdata, -c(label))
 ### Create heatmap
 ctxm_heatmap <- gheatmap(p, Resdata, offset = 13, width = 2.5, font.size = 2, low = "black")
 
-### Create Heatmap + Traits (Traits are letters "ESBL" and "MDR" as opposed to 1's and 0's which are now Presence and Absence)
+### Create Heatmap + Traits (Traits are letters "ESBL" and "MDR" as opposed to 1's and 0's which are now Presence and Absence)###
 ctxm_heatmap <- gheatmap(p, TraitResdata, offset = 13, width = 2.5, font.size = 2.8) + scale_fill_manual(breaks=c("Presence", "Absence", "ESBL", "MDR"), values=c("red2", "black", "blue2", "green4")) 
 
 ###label info###
