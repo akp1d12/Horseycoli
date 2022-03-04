@@ -12,7 +12,7 @@ tibble <- as_tibble(tree)
 Metadata <- read.csv("metadata.csv", header = TRUE)
 tibble_Metadata <- full_join(tibble, Metadata, by = 'label')
 tree <- as.treedata(tibble_Metadata)
-```{summary(tree)}```
+summary(tree)
 
 ### Create tree layouts
 ggtree(tree, branch.length='none', layout='circular')
