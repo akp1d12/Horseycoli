@@ -1,0 +1,30 @@
+
+###ctxm15 tree and heatmap###
+
+###Create environment###
+library(treedataverse)
+
+###Read Resistance data .tsv file
+Resdata <- read.table("ctxm_Resdata.txt", sep="\t", stringsAsFactor=F, header = TRUE)
+
+NA### ctxm15 data Convert first row to header of dataframe
+colnames(Resdata) <- Resdata[1, ]
+
+NA### remove header row from data frame
+NAResdata <- Resdata[- 1, ]
+
+### add rownames as sample/label names, remove label column
+rownames(Resdata) = Resdata$label
+Resdata <- select(Resdata, -c(label))
+
+### Create heatmap
+ctxm_heatmap <- gheatmap(p, Resdata, offset = 13, width = 2.5, font.size = 2, low = "black")
+
+### Create Heatmap + Traits (Traits are letters "ESBL" and "MDR" as opposed to 1's and 0's which are now Presence and Absence)
+ctxm_heatmap <- gheatmap(p, TraitResdata, offset = 13, width = 2.5, font.size = 2.8) + scale_fill_manual(breaks=c("Presence", "Absence", "ESBL", "MDR"), values=c("red2", "black", "blue2", "green4")) 
+
+###label info###
+ ctxm_heatmap + geom_cladelab(node=161, label = "ST-10", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4) + geom_cladelab(node=105, label = "ST-11123", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4) + geom_cladelab(node=55, label = "ST-1205", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4, extend=0.3) + geom_cladelab(node=83, label = "ST-1245", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, extend=1.3, offset.text=0.4) + geom_cladelab(node=81, label = "ST-1277", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4, extend=0.3) + geom_cladelab(node=38, label = "ST-131", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4, extend=0.3) + geom_cladelab(node=138, label = "ST-156", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4) + geom_cladelab(node=109, label = "ST-1586", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4) + geom_cladelab(node=46, label = "ST-1642", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4, extend=0.3) + geom_cladelab(node=79, label = "ST-1709", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4, extend=0.3) + geom_cladelab(node=116, label = "ST-2008", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4) + geom_cladelab(node=132, label = "ST-224", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4) + geom_cladelab(node=56, label = "ST-345", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4, extend=0.3) + geom_cladelab(node=76, label = "ST-38", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4, extend=0.3)+ geom_cladelab(node=77, label = "ST-405", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4, extend=0.3)+ geom_cladelab(node=80, label = "ST-57", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4, extend=0.3)+ geom_cladelab(node=75, label = "ST-641", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4, extend=0.3)+ geom_cladelab(node=78, label = "ST-6589", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4, extend=0.3) + geom_cladelab(node=107, label = "ST-2336", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4) + geom_cladelab(node=146, label = "ST-603", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4) + geom_cladelab(node=149, label = "ST-744", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4)+ geom_cladelab(node=91, label = "ST-88", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4) + geom_cladelab(node=118, label = "ST-906", align =TRUE, barsize=1, fontsize = 2.5, offset=4.5, offset.text=0.4)
+
+###saving high res image###
+ggplot2::ggsave("ctxm15_diagram.pdf", plot = final_tree, dpi = 320, device = "pdf", width = 9.76, height = 9.76)
