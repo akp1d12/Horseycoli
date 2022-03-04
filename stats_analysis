@@ -1,10 +1,13 @@
 ---
 title: "ST_counts code"
 author: "Anish Pandey"
-
+references for this analysis include 
+[1] https://rstudio-pubs-static.s3.amazonaws.com/246172_1930ddfb5f064b2bab54b11016ab407e.html
+[2] https://www.rpubs.com/roalle/mres_2019
+[3] https://rpubs.com/an-bui/vegan-cheat-sheet
 ---
 library(tidyverse)
-##Processing##
+##Processing ST data per variable##
 Clin_ST_count <- Clin_ST %>% count(Clin_ST$ST, sort = TRUE)
 Env_ST_count <- Env_ST %>% count(Env_ST$ST, sort = TRUE)
 View(Env_ST_count)
@@ -28,10 +31,13 @@ Site 2       1
 Site 3       2
 Site 4       1
 
-##Vegan work##
-library(vegan)
+.csv files for ST counts for each variable were concatencated together into "Source_ST_count.csv"
 
 ***********************************
+##Diversity measures ##
+library(vegan)
+
+
 ecoli <- read.csv("Source_ST_count.csv", header=TRUE)
 env <- read.csv("Source_meta.csv", header=TRUE)
 site_type <- env %>% select(Site, Site_Type)
@@ -78,7 +84,7 @@ This means there is no significant difference in diversity between Faecal, Clini
 
 
 
----Evenness or equitability
+###Evenness or equitability###
 
 #Pielou's Evenness
 #evenness/equitability <- shannon_diversity/log(richness)
@@ -87,7 +93,7 @@ eveness <- shannondiv/log(sppr)
 [1] 0.9133725 0.8543764 0.9059624 0.8663001
 
 
-#alpha diversity#
+###alpha diversity###
 
 alpha <- cbind(shannon = shannondiv, richness = sppr, eveness, env)
 
