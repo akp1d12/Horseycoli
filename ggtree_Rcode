@@ -1,0 +1,50 @@
+title: "ggtree_building"
+author: "Anish Pandey"
+---
+### Set Workspace
+setwd("~/Desktop/Barkla/tree_iqtree/R_tree_building")
+```{library(treedataverse)}
+```
+### Read Tree and create tree tibble
+### NB make sure sample names in metadata are called "label" as these are the tree tips
+tree <- read.newick("tree.nwk", node.label = "label")
+tibble <- as_tibble(tree)
+Metadata <- read.csv("metadata.csv", header = TRUE)
+tibble_Metadata <- full_join(tibble, Metadata, by = 'label')
+tree <- as.treedata(tibble_Metadata)
+```{summary(tree)}```
+
+### Create tree layouts
+ggtree(tree, branch.length='none', layout='circular')
+ggtree(tree, layout="daylight", branch.length = 'none')
+
+### Colour tree branches by hospital or by Sample type
+ggtree(tree, branch.length='none', layout='circular', ladderize = FALSE, aes(color=Hospital))
+ggtree(tree, branch.length='none', layout='circular', ladderize = FALSE, aes(color=Type))
+### add sample labels
+ggtree(tree, branch.length='none', layout='circular', ladderize = FALSE, aes(color=Type)) + geom_tiplab(size=2, color="darkblue")
+
+### Adding tip (Sample) labels
+ggtree(tree, branch.length='none', layout='circular') + geom_tiplab(size=2, color="darkblue")
+
+### Adding tip shapes 
+ggtree(tree, branch.length='none', layout='circular', ladderize = FALSE, aes(color=Hospital)) + geom_tippoint(aes(shape=Type), size = 1)
+### Adding tip shapes and removing NA from legend
+tree_base <- ggtree(tree, branch.length='none', layout='circular', ladderize = FALSE, aes(color=Hospital)) + geom_tippoint(aes(shape=Type), na.rm=T, size = 1) + scale_shape_manual(values = seq(4), breaks=c("Cli", "Fae", "Env", "Cli_2"))
+
+### Creating data frame for additional tree images
+ring_df <- data.frame(first=c(Metadata$ESBL), second=c(Metadata$MCR), third=c(Metadata$MDR))
+rownames(ring_df) <- Metadata$label
+
+tree_heatmap <- gheatmap(tree_base, ring_df, offset=0.5, width=0.05, colnames_offset_x = 1,low = "black", font.size=1.5, legend_title = "ESBL/MCR/MDR Presence", colnames = FALSE) 
+
+###Creating hi-res image###
+
+ggplot2::ggsave("horseyecoli_tree.tiff", plot = tree_heatmap, dpi = 320, device = "tiff", width = 9.76, height = 9.76)
+
+### modifying the legends
+tree_heatmap + theme(legend.title = element_text(size = 7), legend.text = element_text(size = 7))
+
+### Visualising nodes
+p <- ggtree(tree) + geom_tiplab()
+viewClade(p, "node"= 343)
