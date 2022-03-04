@@ -40,7 +40,6 @@ rownames(ring_df) <- Metadata$label
 tree_heatmap <- gheatmap(tree_base, ring_df, offset=0.5, width=0.05, colnames_offset_x = 1,low = "black", font.size=1.5, legend_title = "ESBL/MCR/MDR Presence", colnames = FALSE) 
 
 ###Creating hi-res image###
-
 ggplot2::ggsave("horseyecoli_tree.tiff", plot = tree_heatmap, dpi = 320, device = "tiff", width = 9.76, height = 9.76)
 
 ### modifying the legends
