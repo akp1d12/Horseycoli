@@ -3,8 +3,8 @@ author: "Anish Pandey"
 ---
 ### Set Workspace
 setwd("~/Desktop/Barkla/tree_iqtree/R_tree_building")
-```{library(treedataverse)}
-```
+library(treedataverse)
+
 ### Read Tree and create tree tibble
 ### NB make sure sample names in metadata are called "label" as these are the tree tips
 tree <- read.newick("tree.nwk", node.label = "label")
