@@ -1,0 +1,169 @@
+---
+title: "ST_counts code"
+author: "Anish Pandey"
+
+---
+library(tidyverse)
+##Processing##
+Clin_ST_count <- Clin_ST %>% count(Clin_ST$ST, sort = TRUE)
+Env_ST_count <- Env_ST %>% count(Env_ST$ST, sort = TRUE)
+View(Env_ST_count)
+Fae_ST_count <- Fae_ST %>% count(Fae_ST$ST, sort = TRUE)
+setwd("~/Desktop/Barkla/iqtree_phylogeny/ST_stats")
+MDR_ST_count <- MDR_ST %>% count(MDR_ST$ST, sort = TRUE)
+
+ST_data <- read.csv("ecoli_ST_data.csv", header = TRUE)
+H1_Count <- filter(ST_data, Hospital == "H1")
+H1_ST <- H1_Count %>% count(H1_Count$ST, sort=TRUE)
+write.csv(H1_Count, file="H1_ST_count.csv", sep = ",")
+
+	         ST-10
+Faecal	     13
+Clinical	    1
+Environmental	2
+Clinical_2	  1
+          ST-10
+Site 1      13
+Site 2       1
+Site 3       2
+Site 4       1
+
+##Vegan work##
+library(vegan)
+
+***********************************
+ecoli <- read.csv("Source_ST_count.csv", header=TRUE)
+env <- read.csv("Source_meta.csv", header=TRUE)
+site_type <- env %>% select(Site, Site_Type)
+
+###Richness###
+sppr <- specnumber(ecoli)
+> sppr
+[1] 33 12 20 12
+
+sppr_aov <- aov(sppr ~ Site, data = site_type)
+
+> summary(sppr_aov)
+            Df Sum Sq Mean Sq F value Pr(>F)
+Site         1  151.2  151.25   2.108  0.284
+Residuals    2  143.5   71.75 
+
+Analysis of variance probability This means there is no significant difference in species richness between Faecal, Clinical, Clinical_2 and Environmental Sites
+
+###Diversity###
+The Shannon index (H) is a measure of the information content of a community rather than of the particular species that is present. We can test the variance between shannon diversity values using an ANOVA or analysis of variance
+
+shannondiv <- diversity(ecoli)
+> head(shannondiv)
+[1] 3.193614 2.123046 2.714021 2.152675
+
+shandiv_aov <- aov(shannondiv ~Site, data = site_type)
+>summary(shandiv_aov)
+            Df Sum Sq Mean Sq F value Pr(>F)
+Site         1 0.3205  0.3205   1.391  0.359
+Residuals    2 0.4607  0.2304   
+
+This means there is no significant difference in Shannon Diversity between Faecal, Clinical, Clinical_2 and Environmental Sites using the Shannon index
+
+The Simpson index (D) measures the dominance of a multispecies community and can be thought of as the probability that two individuals selected from a community will be of the same species.
+
+simpsonsdiv <- diversity(ecoli, index = "simpson")
+simpson_aov <- aov(simpsonsdiv ~ Site, data = site_type)
+> summary(simpson_aov)
+            Df   Sum Sq  Mean Sq F value Pr(>F)
+Site         1 0.002998 0.002998   0.741   0.48
+Residuals    2 0.008093 0.004047  
+
+This means there is no significant difference in diversity between Faecal, Clinical, Clinical_2 and Environmental Sites using the Simpson index
+
+
+
+---Evenness or equitability
+
+#Pielou's Evenness
+#evenness/equitability <- shannon_diversity/log(richness)
+eveness <- shannondiv/log(sppr)
+> eveness
+[1] 0.9133725 0.8543764 0.9059624 0.8663001
+
+
+#alpha diversity#
+
+alpha <- cbind(shannon = shannondiv, richness = sppr, eveness, env)
+
+> alpha
+   shannon richness   eveness     Site_Type Site
+1 3.193614       33 0.9133725        Faecal    1
+2 2.123046       12 0.8543764      Clinical    2
+3 2.714021       20 0.9059624 Environmental    3
+4 2.152675       12 0.8663001    Clinical_2    4
+
+summary(lm(shannondiv ~ Site, alpha))
+>Call:
+lm(formula = shannondiv ~ Site, data = alpha)
+Residuals:
+       1        2        3        4 
+ 0.26800 -0.54939  0.29477 -0.01339 
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)  
+(Intercept)   3.1788     0.5878   5.408   0.0325 *
+Site         -0.2532     0.2146  -1.180   0.3595  
+---
+Signif. codes:  
+0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Residual standard error: 0.48 on 2 degrees of freedom
+Multiple R-squared:  0.4103,	Adjusted R-squared:  0.1154 
+F-statistic: 1.391 on 1 and 2 DF,  p-value: 0.3595
+
+plot linear model of regression
+
+ggplot(alpha, aes(x =Site, y=shannon, colour = Site_Type)) + geom_point(size = 3) +
++     scale_colour_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+xlab("Site") + 
+ylab("Shannon's H'") +
+ylim(1.1,3) +
+theme_bw() + 
+scale_y_continuous(limits = c(0,3.3)) + geom_smooth(method = lm, colour = "black", fill = "grey90")
+
+###Beta Diversity###
+Adonis usses the bray curtis method 
+ecoli_perm <- adonis(ecoli ~Site, data = env)
+> ecoli_perm
+
+Call:
+adonis(formula = ecoli ~ Site, data = env) 
+
+Permutation: free
+Number of permutations: 23
+
+Terms added sequentially (first to last)
+
+          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
+Site       1   0.21146 0.21146 0.75118 0.27304 0.5833
+Residuals  2   0.56300 0.28150         0.72696       
+Total      3   0.77445                 1.00000       
+
+Assessing differences in community composition is done with permutational Multivariate Analysis of Variance, or perMANOVA. With perMANOVA, the null hypothesis is that the centroids of your groups (in ordination space as defined by the dissimilarity measure you’ve chosen) are equivalent for all groups. In other words, you are asking if, following some measure of (dis)similarity, the community composition of sites between groups is the same. Ecoli communites do not differ by faecal, clinical, environemntal or clinical_2 sources 
+
+###permanova###
+ecoli_matrix <- as.matrix(ecoli)
+View(ecoli_matrix)
+ecoli_mat_sqrt <- sqrt(ecoli_matrix)
+ecoli_dist <- vegdist(ecoli_mat_sqrt, method = "bray")
+ecoli_permanaova <- adonis2(ecoli_dist ~ Site, data = env, permutations = 999, method = "bray")
+Permutation test for adonis under reduced model
+Terms added sequentially (first to last)
+Permutation: free
+Number of permutations: 23
+
+adonis2(formula = ecoli_dist ~ Site, data = env, permutations = 999, method = "bray")
+         Df SumOfSqs      R2      F Pr(>F)
+Site      1  0.16613 0.25749 0.6935 0.5833
+Residual  2  0.47906 0.74251              
+Total     3  0.64519 1.00000 
+
+###Chao's Interpolation/Extrapolation curve figure
+library(iNEXT)
+###Rarefaction/Extrapolation Processing
+iNEXT(ecoli, q=0, datatype="abundance")
+ggiNEXT(ecoli, type=1, se=TRUE, facet.var="none", color.var="site", grey=FALSE)
